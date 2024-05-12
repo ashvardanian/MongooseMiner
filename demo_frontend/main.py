@@ -2,6 +2,7 @@ import gradio as gr
 import random
 import time
 import os
+import json
 
 from groq import Groq
 
@@ -13,12 +14,32 @@ client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
 
+tools = [
+    {
+        "type": "function",
+        "function": {
+                "name": "get_related_functions",
+                "description": "Get docstrings for internal functions for any library on PyPi.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "user_query": {
+                            "type": "string",
+                            "description": "A query to retrieve docstrings and find useful information.",
+                        }
+                    },
+                    "required": ["team_name"],
+                },
+        },
+    }
+]
+
 
 def user(user_message, history):
     return "", history + [[user_message, None]]
 
 
-def call_service(query):
+def get_related_functions(user_query):
     docstring = """
     Return matrix rank of array using SVD method
 
@@ -119,36 +140,63 @@ def call_service(query):
 
     end = f"""
              You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
-             Question: {query}
+             Question: {user_query}
              Context: {docstring}
              Answer: """
     return end
 
 
 def generate_rag(history):
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a function calling LLM that uses the data extracted from the get_related_functions function to answer questions around writing Python code. Use the extraced docstrings to write better code."
+        },
+        {
+            "role": "user",
+            "content": history[-1][0],
+        }
+    ]
     history[-1][1] = ""
-    stream = client.chat.completions.create(
-        messages=[
-            # Set an optional system message. This sets the behavior of the
-            # assistant and can be used to provide specific instructions for
-            # how it should behave throughout the conversation.
-            {
-                "role": "system",
-                "content": call_service(history[-1][0])
-            },
-        ],
-        stream=True,
-        model="llama3-8b-8192",
-        max_tokens=1024,
-        temperature=0
-    )
+    function_calling = True
+    while function_calling:
+        response = client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+            max_tokens=4096
+        )
+        response_message = response.choices[0].message
+        tool_calls = response_message.tool_calls
 
-    for chunk in stream:
-        if chunk.choices[0].delta.content != None:
-            history[-1][1] += chunk.choices[0].delta.content
-            yield history
+        if tool_calls:
+            available_functions = {
+                "get_related_functions": get_related_functions,
+            }
+            messages.append(response_message)
+
+            for tool_call in tool_calls:
+                function_name = tool_call.function.name
+                function_to_call = available_functions[function_name]
+                function_args = json.loads(tool_call.function.arguments)
+                function_response = function_to_call(
+                    user_query=function_args.get("user_query")
+                )
+                messages.append(
+                    {
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "name": function_name,
+                        "content": function_response,
+                    }
+                )
         else:
-            return
+            break
+
+    print(response_message.content)
+    history[-1][1] += response_message.content
+    return history
 
 
 def generate_llama3(history):
