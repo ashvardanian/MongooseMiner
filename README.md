@@ -2,14 +2,13 @@
 
 ![Preview](https://github.com/ashvardanian/ashvardanian/blob/master/repositories/MongooseMiner.jpg?raw=true)
 
-A search system to push LLM-based code generation beyond average human-level performance, as most humans:
+MongooseMiner is a search system that pushes LLM-based code generation beyond average human performance. Most LLMs for code generation write code like humans:
 
-- use the most popular packages, rather than the most appropriate & performant ones,
-- use the most common functions, rather than the most appropriate & performant ones,
-- don't remember all available function arguments and perform many operations, where one is enough.
+- They use the most common packages rather than the most appropriate and powerful ones,
+- They use the most common functions instead of the most appropriate and powerful ones,
+- They do not memorize all available function arguments and perform many operations where one is sufficient. This is because LLMs learn from the average developer's code, while MongooseMiner learns from the experts who wrote the libraries and documentation.
 
-LLMs learning from human code inherit same problems, while MongooseMiner can provide a solution.
-It mines doc-strings for all the most common PyPi projects fetches them on-demand to guide the LLM auto-completions.
+By evaluating the documentation strings of the most common PyPI projects and retrieving them as needed to guide LLM autocompletion, MongooseMiner can deliver the most appropriate and performant code.
 
 ## Dataset
 
