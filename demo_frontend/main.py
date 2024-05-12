@@ -1,6 +1,4 @@
 import gradio as gr
-import random
-import time
 import os
 import json
 
