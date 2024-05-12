@@ -46,7 +46,11 @@ def get_docs_and_code(cls_or_method: Any) -> SingleEntry:
         signature = None
 
     return SingleEntry(
-        package=cls_or_method.__module__, docstring=doc, code=code, signature=signature, name=cls_or_method.__name__
+        package=cls_or_method.__module__,
+        docstring=doc,
+        code=code,
+        signature=signature,
+        name=cls_or_method.__name__,
     )
 
 
@@ -69,12 +73,13 @@ def _recursive_package_list_modules(package: object):
             for name, obj in inspect.getmembers(obj):
                 if inspect.isfunction(obj):
                     yield obj
-                
+
         elif inspect.ismodule(obj):
             try:
                 yield from _recursive_package_list_modules(obj.__name__)
             except:
                 continue
+
 
 def get_all_docstrings_and_code(package_name: str) -> list[SingleEntry]:
     # get all classes from a package
@@ -109,9 +114,7 @@ def package_to_s3parquet(package_name: str, s3_bucket: Optional[str]):
     pushes the parquet file to s3
     """
     os.environ["VIRTUAL_ENV"] = sys.prefix
-    subprocess.check_call(
-        ["uv", "pip", "install", package_name]
-    )
+    subprocess.check_call(["uv", "pip", "install", package_name])
     # get all docstrings and code of the package
     print(f"installing package {package_name} done.")
     entries = get_all_docstrings_and_code(package_name)
