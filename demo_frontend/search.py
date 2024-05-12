@@ -7,7 +7,7 @@ import pandas as pd
 engine = AsyncEmbeddingEngine.from_args(
     EngineArgs(
         model_name_or_path="michaelfeil/jina-embeddings-v2-base-code",
-        batch_size=8,
+        batch_size=8,     
     )
 )
 
@@ -17,6 +17,9 @@ async def embed_texts(texts: list[str]) -> np.ndarray:
         embeddings = (await engine.embed(texts))[0]
         return np.array(embeddings)
 
+def embed_texts_sync(texts: list[str]) -> np.ndarray:
+    loop =  asyncio.new_event_loop()
+    return loop.run_until_complete(embed_texts(texts))
 
 index = None
 docs_index = None
@@ -25,7 +28,7 @@ docs_index = None
 def build_index(demo_mode=True):
     global index, docs_index
     index = Index(
-        ndim=asyncio.run(embed_texts(["Hi"])).shape[
+        ndim=embed_texts_sync(["Hi"]).shape[
             -1
         ],  # Define the number of dimensions in input vectors
         metric="cos",  # Choose 'l2sq', 'haversine' or other metric, default = 'ip'
@@ -41,7 +44,7 @@ def build_index(demo_mode=True):
             "torch.div(*demo)",
             "torch.sub(*demo)",
         ]
-        embeddings = asyncio.run(embed_texts(docs_index))
+        embeddings = embed_texts_sync(docs_index)
         index.add(np.arange(len(docs_index)), embeddings)
         return
     # TODO: Michael, load parquet with embeddings
@@ -52,7 +55,7 @@ if index is None:
 
 
 def answer_query(query: str) -> list[str]:
-    embedding = asyncio.run(embed_texts([query]))[0]
+    embedding = embed_texts_sync([query])
     matches = index.search(embedding, 10)
     texts = [docs_index[match.key] for match in matches]
     return texts
