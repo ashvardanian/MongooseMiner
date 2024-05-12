@@ -13,7 +13,7 @@ def get_dataset():
     return train_set, validation_set, test_set
 
 def get_embedding_vecs(dataset):
-    embs = dataset.filter(lambda x: len(x["func_code_string"]) < 10000 and len(x["func_documentation_string"]) < 10000).map(query_embs,  batched=True, batch_size=32, num_proc=16)
+    embs = dataset.map(query_embs,  batched=True, batch_size=32, num_proc=16)
     code_vecs = embs["embed_func_code"]
     docs_vecs = embs["embed_func_doc"]
     return np.array(code_vecs), np.array(docs_vecs)
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     OUT_PATH = "/home/michael/MongooseMiner/data/"
     datasets = get_dataset()
     for dataset in datasets:
-        if dataset.split._name == "train":
+        if dataset.split._name == "test":
             code_vecs, docs_vecs = get_embedding_vecs(dataset)
             code_path = Path(OUT_PATH).joinpath(dataset.split._name + "_code.fbin").as_posix()
             docs_path = Path(OUT_PATH).joinpath(dataset.split._name + "_docs.fbin").as_posix()
