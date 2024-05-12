@@ -1,6 +1,4 @@
 import gradio as gr
-import random
-import time
 import os
 import json
 
@@ -28,7 +26,7 @@ tools = [
                             "description": "A query to retrieve docstrings and find useful information.",
                         }
                     },
-                    "required": ["team_name"],
+                    "required": ["user_query"],
                 },
         },
     }
@@ -194,7 +192,6 @@ def generate_rag(history):
         else:
             break
 
-    print(response_message.content)
     history[-1][1] += response_message.content
     return history
 
