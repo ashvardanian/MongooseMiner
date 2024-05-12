@@ -3,10 +3,6 @@ import numpy as np
 from usearch.index import Index, Matches
 import asyncio
 import pandas as pd
-import os
-os.environ["HF_HOME"] = "/app"
-os.environ["TRANSFORMERS_CACHE"] = "/app"
-os.environ["INFINITY_QUEUE_SIZE"] = "512000"
 
 engine = AsyncEmbeddingEngine.from_args(
     EngineArgs(
