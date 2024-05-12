@@ -2,7 +2,7 @@ from infinity_emb import AsyncEmbeddingEngine, EngineArgs
 import numpy as np
 from usearch.index import Index, Matches
 import asyncio
-import pandas as pd
+import datasets
 
 engine = AsyncEmbeddingEngine.from_args(
     EngineArgs(
@@ -47,8 +47,12 @@ def build_index(demo_mode=True):
         embeddings = embed_texts_sync(docs_index)
         index.add(np.arange(len(docs_index)), embeddings)
         return
-    # TODO: Michael, load parquet with embeddings
-
+    else:
+        ds = datasets.load_dataset("michaelfeil/mined_docstrings_pypi_embedded")
+        ds = ds["train"]
+        docs_index = ds["code"]
+        embeddings = ds["embed_func_code"]
+        index.add(np.arange(len(docs_index)), embeddings)
 
 if index is None:
     build_index()

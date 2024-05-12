@@ -5,4 +5,4 @@ RUN pip install groq gradio infinity_emb[all] usearch datasets
 WORKDIR /app
 COPY . .
 
-CMD entrypoint.sh
+CMD bash entrypoint.sh
