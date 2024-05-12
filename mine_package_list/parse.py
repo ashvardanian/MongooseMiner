@@ -117,6 +117,7 @@ def package_to_s3parquet(package_name: str, s3_bucket: Optional[str]):
     subprocess.check_call(["uv", "pip", "install", package_name])
     # get all docstrings and code of the package
     print(f"installing package {package_name} done.")
+    package_name = package_name.replace("-", "_")
     entries = get_all_docstrings_and_code(package_name)
     # convert to a pandas dataframe
     df = pd.DataFrame([entry.__dict__ for entry in entries])
