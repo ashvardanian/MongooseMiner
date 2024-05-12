@@ -13,8 +13,8 @@ def eval_similarity(x, y):
     print(f"Recall@10: {recall10}")
 
 if __name__ == "__main__":
-    CODE_PATH = "/home/michael/MongooseMiner/data/validation_code.fbin"
-    DOCS_PATH = "/home/michael/MongooseMiner/data/validation_docs.fbin"
+    CODE_PATH = "/home/michael/MongooseMiner/data/test_code.fbin"
+    DOCS_PATH = "/home/michael/MongooseMiner/data/test_docs.fbin"
     code_embs = load_matrix(CODE_PATH)
     doc_embs = load_matrix(DOCS_PATH)
     print("Code <-> Doc")

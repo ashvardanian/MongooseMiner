@@ -13,13 +13,18 @@ def get_dataset():
     return train_set, validation_set, test_set
 
 def get_embedding_vecs(dataset):
-    embs = dataset.map(query_embs,  batched=True, batch_size=32, num_proc=16)
+    embs = dataset.map(truncate, num_proc=16).map(query_embs,  batched=True, batch_size=32, num_proc=16)
     code_vecs = embs["embed_func_code"]
     docs_vecs = embs["embed_func_doc"]
     return np.array(code_vecs), np.array(docs_vecs)
 
+def truncate(row: dict, max_len: int = 8192) -> dict:
+    row["func_code_string"] = row["func_code_string"][:max_len]
+    row["func_documentation_string"] = row["func_documentation_string"][:max_len]
+    return row
+
 def embed(text: list[str]) -> list[np.array]:
-    for _ in range(3):
+    for _ in range(5):
         try:
             api_url = "https://cvllama3hackathon-infinity.hf.space/embeddings"
             response = requests.post(api_url, json={"model":"code-embed","input": text})
