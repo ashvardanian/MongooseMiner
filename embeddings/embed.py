@@ -1,9 +1,9 @@
-import polars as pl
+import requests
+from pathlib import Path
+
 import numpy as np
 from usearch.io import save_matrix
-import requests
 from datasets import load_dataset
-from pathlib import Path
 
 def get_dataset():
     dataset = load_dataset("unum-cloud/ann-codesearch-4m")
@@ -27,6 +27,7 @@ def embed(text: list[str]) -> list[np.array]:
             return embs
         except Exception as e:
             continue
+
 
 def query_embs(list_rows: list[dict]):
     list_rows["embed_func_code"] = embed(list_rows["func_code_string"])
