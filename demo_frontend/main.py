@@ -4,9 +4,11 @@ import json
 
 from groq import Groq
 from search import answer_query
-from dotenv import load_dotenv
-load_dotenv(dotenv_path="./.env")
-
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path="./.env")
+except:
+    pass
 
 client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
