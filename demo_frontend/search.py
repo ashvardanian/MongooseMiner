@@ -25,7 +25,7 @@ index = None
 docs_index = None
 
 
-def build_index(demo_mode=True):
+def build_index(demo_mode=False):
     global index, docs_index
     index = Index(
         ndim=embed_texts_sync(["Hi"]).shape[
@@ -48,11 +48,14 @@ def build_index(demo_mode=True):
         index.add(np.arange(len(docs_index)), embeddings)
         return
     else:
+        print("loading 280k dataset")
         ds = datasets.load_dataset("michaelfeil/mined_docstrings_pypi_embedded")
         ds = ds["train"]
         docs_index = ds["code"]
-        embeddings = ds["embed_func_code"]
+        embeddings = np.array(ds["embed_func_code"])
+        print("indexing the 280k vectors")
         index.add(np.arange(len(docs_index)), embeddings)
+        print("usearch index done.")
 
 if index is None:
     build_index()
